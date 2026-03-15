@@ -70,9 +70,11 @@ Prism isn't just a tool you open — it coaches you during everyday conversation
 ## Setup
 
 1. Install the skill in your OpenClaw workspace (`skills/prism-thinking-refinery/`)
-2. On first use, the agent runs a **calibration session** — 3 scenario-based questions to map your starting profile
-3. Set your digest preferences (daily/weekly push of curated content)
-4. Start thinking differently
+2. Run `node tools/prism-update.mjs --init` to create data files
+3. On first use, the agent runs a **calibration session** — a scenario-based conversation to map your starting profile
+4. Set your digest preferences (daily/weekly push of curated content)
+5. The agent adds a passive training snippet to your `AGENTS.md` so cognitive coaching works in all conversations
+6. Start thinking differently
 
 ## Privacy
 

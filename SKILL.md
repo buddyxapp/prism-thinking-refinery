@@ -18,20 +18,26 @@ multi-dimensional and personal.
 
 On first use (when `data/profile.json` does not exist):
 
-1. Create the `data/` directory structure (see Data Layout below)
+1. Initialize data files:
+   ```bash
+   node tools/prism-update.mjs --init
+   ```
+   This creates `data/profile.json` (default scores) and `data/config.json` (digest preferences).
+
 2. Run the **Calibration Session** — see `references/calibration.md`
-3. Ask the user for digest preferences and save to `data/config.json`:
+
+3. Ask the user for digest preferences and update `data/config.json`:
    - `pushTime`: preferred time for daily digest (default `"22:00"`)
    - `pushFrequency`: `"daily"` | `"weekly"` | `"off"` (default `"daily"`)
    - `timezone`: user's timezone (default from system)
-4. **Create the cron job** for the digest. OpenClaw skills have no install hook, so this must
-   be done explicitly during setup:
+
+4. **Create the cron job** for the digest:
    ```bash
    openclaw cron add \
      --name "prism-daily-digest" \
      --cron "0 <HOUR> * * *" \
      --tz "<USER_TIMEZONE>" \
-     --message "Run Prism Thinking Refinery daily digest: read data/profile.json, find the user's weakest dimensions, search for 2-3 deep cross-domain articles biased toward weak areas, generate a Daily Prism Prompt question targeting the weakest dimension, and deliver both to the user. Save recommendations to data/reading-list.md." \
+     --message "Run Prism daily digest. Steps: (1) Run: node skills/prism-thinking-refinery/tools/prism-update.mjs --show to see current radar. (2) Identify the 2 weakest dimensions. (3) Web search for 2-3 deep articles biased toward those weak dimensions, include 1 cross-domain piece. (4) Generate a Daily Prism Prompt question targeting the weakest dimension in the user's language. (5) Deliver the articles and prompt to the user. (6) Append recommendations to skills/prism-thinking-refinery/data/reading-list.md using the format in that file." \
      --session isolated \
      --announce \
      --to "<CHANNEL:CHAT_ID>" \
@@ -41,7 +47,11 @@ On first use (when `data/profile.json` does not exist):
    Replace `<HOUR>`, `<USER_TIMEZONE>`, and `<CHANNEL:CHAT_ID>` with user preferences.
    If weekly, use `--cron "0 <HOUR> * * 0"` (Sunday).
    If off, skip this step.
+
 5. Explain the five modes, three passive training mechanisms, and how to trigger them
+
+6. **Remind the user** to add the passive training snippet to their `AGENTS.md` — see
+   the "Passive Training — Integration" section below.
 
 ## Data Layout
 
@@ -82,8 +92,37 @@ data/                          # Personal data — .gitignore this
 - `customDimensions`: user-added dimensions, same 1.0–10.0 scale
 - `history`: array of `{ "date", "dimension", "delta", "reason" }` for tracking changes
 
-Users may add custom dimensions at any time (e.g., `"ethical_reasoning"`, `"aesthetic_judgment"`).
-Treat custom dimensions identically to built-in ones in all modes.
+Users may add custom dimensions at any time:
+```bash
+node tools/prism-update.mjs --add-dimension ethical_reasoning
+```
+
+## Profile Update Tool
+
+**Always use the tool to update scores.** Do not edit `profile.json` by hand.
+
+```bash
+# Update a dimension score
+node tools/prism-update.mjs --dimension inverse_thinking --delta +0.2 --reason "engaged with inversion probe in sparring"
+
+# Show current radar
+node tools/prism-update.mjs --show
+
+# Initialize data files (first use)
+node tools/prism-update.mjs --init
+
+# Add a custom dimension
+node tools/prism-update.mjs --add-dimension ethical_reasoning
+```
+
+The tool handles:
+- Precise arithmetic (no floating-point drift)
+- Clamping scores to 1.0–10.0 range
+- Enforcing max ±0.5 per update
+- Auto-incrementing sessionCount and lastUpdated
+- Appending to history array
+- Writing to journal/YYYY-MM-DD.md
+- Creating .bak backup before each write
 
 ## Five Modes
 
@@ -110,8 +149,10 @@ End with a synthesis that connects the perspectives and one provocative question
 | 7–9 | Apply directly at advanced level, challenge assumptions |
 | 10 | Invite user to apply it themselves or propose a novel angle |
 
-After the analysis, update `profile.json`: adjust dimensions used by +0.1 to +0.3 based on
-the user's engagement quality. Log to `data/journal/YYYY-MM-DD.md`.
+After the analysis, update radar using the tool:
+```bash
+node tools/prism-update.mjs --dimension <dim> --delta +0.2 --reason "active application in prism analysis on <topic>"
+```
 
 ### 2. 🥊 Thought Sparring
 
@@ -127,7 +168,7 @@ Rules:
 - Acknowledge when the user makes a strong point
 - After the exchange, give honest feedback on which dimensions were strong/weak
 
-Update radar scores after each sparring session (±0.1 to ±0.5).
+Update radar after each sparring session using the tool (±0.1 to ±0.5 per dimension).
 
 ### 3. 📚 Curated Feed
 
@@ -138,24 +179,39 @@ Search for and recommend 2–3 pieces of deep content (articles, papers, talks, 
 - For each recommendation: title, source, 2-sentence summary, and
   "Why this matters for you" tied to their radar profile
 
-Save recommendations to `data/reading-list.md` with date and status (unread/read/noted).
+Append recommendations to `data/reading-list.md` using this format:
 
-When triggered by cron/heartbeat, deliver via the current messaging channel.
+```markdown
+## YYYY-MM-DD
+
+### 1. <Title>
+- **Source:** <URL or publication>
+- **Summary:** <2 sentences>
+- **Dimension:** <target dimension>
+- **Why this matters:** <1 sentence tied to radar>
+- **Status:** unread
+```
 
 ### 4. 📓 Decision Journal
 
-When the user wants to record a prediction or decision:
+When the user wants to record a prediction or decision, append to `data/predictions.md`:
 
-1. Capture: the prediction, reasoning, confidence level (1–10), date, and relevant dimensions
-2. Append to `data/predictions.md`
+```markdown
+## YYYY-MM-DD — <Short title>
+- **Prediction:** <what the user predicts>
+- **Reasoning:** <why>
+- **Confidence:** <1–10>
+- **Dimensions:** <relevant dimensions>
+- **Review after:** YYYY-MM-DD (30 days later)
+```
 
 When the user wants to review (or on a monthly cadence):
 
-1. Read `data/predictions.md`, find entries older than 30 days
+1. Read `data/predictions.md`, find entries with review dates in the past
 2. For each: assess outcome, identify reasoning patterns
 3. Note which dimensions contributed to accurate vs inaccurate predictions
-4. Write review to `data/predictions-review.md`
-5. Adjust radar scores based on demonstrated judgment (±0.1 to ±0.3)
+4. Append review to `data/predictions-review.md`
+5. Update radar using the tool based on demonstrated judgment
 
 ### 5. ✍️ Clarity Writing
 
@@ -171,42 +227,29 @@ that is a secondary output.
 
 ## Radar Updates
 
-Every interaction that exercises a thinking dimension should update `profile.json`:
+Every interaction that exercises a thinking dimension should update via the tool:
 
-- **Small delta** (±0.1): passive exposure (reading, listening)
+- **Small delta** (±0.1): passive exposure (reading, listening, dimension tag)
 - **Medium delta** (±0.2–0.3): active application (analysis, writing)
 - **Large delta** (±0.4–0.5): demonstrated mastery or significant struggle in sparring
-
-Always log changes to `history` array and `data/journal/YYYY-MM-DD.md` with reasoning.
 
 Scores are soft-capped at 10.0 and floored at 1.0. Moving above 8.0 should be rare and require
 consistent advanced demonstration.
 
 ## Radar Visualization
 
-When the user asks to see their radar (or after calibration), generate a text-based radar
-representation showing all dimensions and scores. Example:
+When the user asks to see their radar (or after calibration):
 
-```
-🔺 Thinking Radar — Yi-an
-
-first_principles    ████████░░  7.2
-inverse_thinking    ████░░░░░░  4.1
-stakeholder_lens    ██████░░░░  6.0
-systems_thinking    █████░░░░░  5.3
-game_theory         ███░░░░░░░  3.4
-historical_analogy  ████░░░░░░  4.0
-second_order_effects █████░░░░░  5.1
-cross_domain        ██████░░░░  6.2
+```bash
+node tools/prism-update.mjs --show
 ```
 
 If image generation is available, offer to create an actual spider-web chart.
 
 ## Digest Trigger
 
-- **Cron/Heartbeat**: check `data/config.json` for `pushTime` and `pushFrequency`.
-  If it is time, run Curated Feed mode and deliver results.
-- **Manual**: user says "today's prism" or "what should I read" — run immediately.
+- **Cron**: runs at the scheduled time, delivers curated feed + daily prism prompt
+- **Manual**: user says "today's prism" or "what should I read" — run immediately
 - **Config change**: user can update preferences anytime by saying
   "change my digest to weekly" etc. Update `data/config.json`.
 
@@ -214,6 +257,9 @@ If image generation is available, offer to create an actual spider-web chart.
 
 These three mechanisms run **outside** of explicit training sessions, woven into everyday
 conversations. They are what turn Prism from a "tool you use" into a "coach that's always with you."
+
+**Important:** For passive training to work, the agent must have the instructions in a file it
+reads every session. See "Passive Training — Integration" below.
 
 ### 🪞 Reflection Nudge
 
@@ -235,7 +281,6 @@ Rules:
 - Maximum once per conversation — don't be annoying
 - Only when the nudge genuinely adds value, not for every statement
 - Skip if the user is in a hurry, venting, or clearly not in analytical mode
-- Update radar by +0.1 if the user engages with the nudge
 
 ### 📰 Daily Prism Prompt
 
@@ -254,7 +299,7 @@ Rules:
 - Rotate dimensions, biased toward weak ones
 - Keep questions in the user's preferred language
 - Don't expect or require a response — the value is in the thinking, not the answer
-- If the user does respond, log it and adjust radar accordingly
+- If the user does respond, log it and update radar using the tool
 
 ### 🏷️ Dimension Tagging
 
@@ -263,11 +308,16 @@ conversation, tag it inline with a small annotation:
 
 Format: `（🔗 cross_domain +0.1）` or `（🔄 inverse_thinking +0.2）`
 
+**Immediately** update the score using the tool when you tag:
+```bash
+node tools/prism-update.mjs --dimension cross_domain --delta +0.1 --reason "naturally connected biology to cybersecurity in conversation"
+```
+
 Rules:
 - Tag only when genuinely demonstrated, not every statement
 - Maximum 2–3 tags per conversation
 - Use the dimension emoji + name + delta
-- Update `profile.json` with the tagged deltas at end of conversation
+- Update immediately — do not wait until end of conversation
 - This builds **metacognition** — the user starts noticing their own thinking patterns
 - If the user asks "what was that tag?", briefly explain the dimension
 
@@ -280,6 +330,31 @@ Dimension emoji reference:
 - 📜 historical_analogy
 - 🌊 second_order_effects
 - 🔗 cross_domain
+
+## Passive Training — Integration
+
+For passive training (Reflection Nudge and Dimension Tagging) to work in everyday conversations,
+the agent needs to see the instructions every session — not just when this skill is triggered.
+
+**During setup, add this block to the user's `AGENTS.md`:**
+
+```markdown
+## Passive Cognitive Training (Prism)
+
+During every conversation, apply these lightly:
+- When the user makes an analytical judgment, briefly suggest one alternative thinking dimension
+  (max once per conversation, skip if user is busy or not in analytical mode)
+- When the user demonstrates strong thinking in a specific dimension, tag it inline:
+  （🔗 cross_domain +0.1）and immediately run:
+  `node skills/prism-thinking-refinery/tools/prism-update.mjs --dimension <dim> --delta <±val> --reason "<why>"`
+- To see the user's current thinking profile:
+  `node skills/prism-thinking-refinery/tools/prism-update.mjs --show`
+
+Dimension emojis: 🧱 first_principles | 🔄 inverse_thinking | 👥 stakeholder_lens |
+🕸️ systems_thinking | ♟️ game_theory | 📜 historical_analogy | 🌊 second_order_effects | 🔗 cross_domain
+
+Don't overdo it. Max 2-3 tags per conversation. Skip if the user is in a hurry.
+```
 
 ## Reference Files
 
