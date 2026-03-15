@@ -57,6 +57,16 @@ The skill adjusts its approach based on your dimension scores:
 
 You can also add **custom dimensions** (ethical reasoning, aesthetic judgment, etc.) anytime. The system treats them identically.
 
+## Always-On Passive Training
+
+Prism isn't just a tool you open — it coaches you during everyday conversations:
+
+| Mechanism | What It Does |
+|-----------|-------------|
+| 🪞 **Reflection Nudge** | When you make a judgment in normal chat, gently suggests one alternative dimension to consider |
+| 📰 **Daily Prism Prompt** | A 30-second reflective question in your digest, targeting your weakest dimension |
+| 🏷️ **Dimension Tagging** | Inline annotations like `（🔗 cross_domain +0.1）` when you naturally demonstrate strong thinking — builds metacognition |
+
 ## Setup
 
 1. Install the skill in your OpenClaw workspace (`skills/prism-thinking-refinery/`)

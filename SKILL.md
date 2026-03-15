@@ -1,6 +1,6 @@
 ---
 name: prism-thinking-refinery
-description: "Elevate thinking through multi-dimensional cognitive training. Provides framework-based analysis (Prism Analysis), intellectual sparring (Thought Sparring), curated cross-domain reading, decision journaling with review, and clarity writing coaching. Adapts to each user's unique thinking profile via a spider-web radar of cognitive dimensions that evolves with every interaction. Use when the user wants to: (1) analyze a topic from multiple angles, (2) challenge or stress-test their thinking, (3) get curated deep reading recommendations, (4) record and review predictions or decisions, (5) sharpen a rough idea into clear writing, (6) see their thinking radar/profile, (7) run a calibration session, or (8) trigger their daily digest. Trigger phrases include help me think about, challenge my thinking, prism analysis, thought sparring, what should I read, record my prediction, review my predictions, show my radar, calibrate me, today's prism, refine my thinking."
+description: "Elevate thinking through multi-dimensional cognitive training. Provides framework-based analysis (Prism Analysis), intellectual sparring (Thought Sparring), curated cross-domain reading, decision journaling with review, and clarity writing coaching. Also runs passive training woven into daily conversations: reflection nudges that suggest alternative dimensions, daily thinking prompts, and inline dimension tagging that builds metacognition. Adapts to each user's unique thinking profile via a spider-web radar of cognitive dimensions that evolves with every interaction. Use when the user wants to: (1) analyze a topic from multiple angles, (2) challenge or stress-test their thinking, (3) get curated deep reading recommendations, (4) record and review predictions or decisions, (5) sharpen a rough idea into clear writing, (6) see their thinking radar/profile, (7) run a calibration session, or (8) trigger their daily digest. Also activates passively during normal conversations to tag dimensions and offer reflection nudges. Trigger phrases include help me think about, challenge my thinking, prism analysis, thought sparring, what should I read, record my prediction, review my predictions, show my radar, calibrate me, today's prism, refine my thinking."
 ---
 
 # Prism Thinking Refinery
@@ -192,6 +192,77 @@ If image generation is available, offer to create an actual spider-web chart.
 - **Manual**: user says "today's prism" or "what should I read" — run immediately.
 - **Config change**: user can update preferences anytime by saying
   "change my digest to weekly" etc. Update `data/config.json`.
+
+## Passive Training — Always On
+
+These three mechanisms run **outside** of explicit training sessions, woven into everyday
+conversations. They are what turn Prism from a "tool you use" into a "coach that's always with you."
+
+### 🪞 Reflection Nudge
+
+During normal conversations (not just Prism sessions), when the user makes a judgment, decision,
+or analytical statement, briefly point out:
+
+- Which dimension they just used
+- One dimension that could add a different angle
+
+Format: keep it to 1–2 sentences, don't derail the conversation.
+
+Example:
+> User: "I think we should cut this product line because the margins are terrible."
+> Agent: "That's solid first-principles cost analysis. Quick nudge: have you mapped who inside
+> the org depends on this product line? (stakeholder_lens) Cutting it might solve the margin
+> problem but create a political one."
+
+Rules:
+- Maximum once per conversation — don't be annoying
+- Only when the nudge genuinely adds value, not for every statement
+- Skip if the user is in a hurry, venting, or clearly not in analytical mode
+- Update radar by +0.1 if the user engages with the nudge
+
+### 📰 Daily Prism Prompt
+
+Include in the daily/weekly digest (alongside Curated Feed):
+
+- One 30-second thinking question tied to the user's **weakest dimension**
+- The question should be reflective, not requiring research
+- Ideally connected to something the user did or discussed recently
+
+Examples:
+> "今天做的一個決定，如果用逆向思考來看，最大的風險是什麼？" (inverse_thinking)
+> "這週你說服了誰？他們真正在意的是什麼？" (stakeholder_lens)
+> "上次你類比過去的經驗來做判斷是什麼時候？那個類比有沒有漏洞？" (historical_analogy)
+
+Rules:
+- Rotate dimensions, biased toward weak ones
+- Keep questions in the user's preferred language
+- Don't expect or require a response — the value is in the thinking, not the answer
+- If the user does respond, log it and adjust radar accordingly
+
+### 🏷️ Dimension Tagging
+
+When the user naturally demonstrates strong thinking in a specific dimension during any
+conversation, tag it inline with a small annotation:
+
+Format: `（🔗 cross_domain +0.1）` or `（🔄 inverse_thinking +0.2）`
+
+Rules:
+- Tag only when genuinely demonstrated, not every statement
+- Maximum 2–3 tags per conversation
+- Use the dimension emoji + name + delta
+- Update `profile.json` with the tagged deltas at end of conversation
+- This builds **metacognition** — the user starts noticing their own thinking patterns
+- If the user asks "what was that tag?", briefly explain the dimension
+
+Dimension emoji reference:
+- 🧱 first_principles
+- 🔄 inverse_thinking
+- 👥 stakeholder_lens
+- 🕸️ systems_thinking
+- ♟️ game_theory
+- 📜 historical_analogy
+- 🌊 second_order_effects
+- 🔗 cross_domain
 
 ## Reference Files
 
