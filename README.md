@@ -2,7 +2,13 @@
 
 **An adaptive cognitive training skill for OpenClaw.**
 
-Most people think in one or two default modes. Prism breaks that pattern — it maps your unique thinking profile across multiple cognitive dimensions, then pushes you to grow where you're weakest.
+## Why
+
+AI can write your code, draft your emails, and summarize your meetings. Execution is no longer the bottleneck — thinking is.
+
+When AI handles the doing, what separates people is the quality of their questions, the breadth of their perspective, and the depth of their judgment. Yet most of us default to one or two thinking modes and never notice the blind spots.
+
+Prism exists because the most valuable thing AI can do for you isn't doing your work — it's making you a better thinker. It maps how you think, finds where you're weak, and pushes you to grow where it matters most.
 
 ## How It Works
 
