@@ -21,6 +21,21 @@ second_order_effects █████░░░░░  5.1
 cross_domain        ██████░░░░  6.2
 ```
 
+## Eight Cognitive Dimensions
+
+| Dimension | Core Question |
+|-----------|--------------|
+| 🧱 **First Principles** | What's a fact vs. what's just convention? |
+| 🔄 **Inverse Thinking** | How would I guarantee failure? |
+| 👥 **Stakeholder Lens** | How do others see this? |
+| 🕸️ **Systems Thinking** | What feedback loops exist here? |
+| ♟️ **Game Theory** | If I do X, how will they respond? |
+| 📜 **Historical Analogy** | When has something like this happened before? |
+| 🌊 **Second-Order Effects** | Then what? And then what? |
+| 🔗 **Cross-Domain Connection** | How do other fields solve a similar problem? |
+
+You can add custom dimensions anytime (e.g., ethical reasoning, aesthetic judgment). The system treats them identically.
+
 ## Five Modes
 
 | Mode | What It Does |
