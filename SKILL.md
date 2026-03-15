@@ -341,19 +341,16 @@ the agent needs to see the instructions every session — not just when this ski
 ```markdown
 ## Passive Cognitive Training (Prism)
 
-During every conversation, apply these lightly:
-- When the user makes an analytical judgment, briefly suggest one alternative thinking dimension
-  (max once per conversation, skip if user is busy or not in analytical mode)
-- When the user demonstrates strong thinking in a specific dimension, tag it inline:
-  （🔗 cross_domain +0.1）and immediately run:
+Only activate when the user is clearly in analytical/decision-making mode — discussing strategy,
+evaluating options, debating ideas, or making judgments. Do NOT activate during casual chat,
+daily life topics, quick questions, or emotional conversations.
+
+When active:
+- Optionally tag strong thinking inline: （🔗 cross_domain +0.1）and run:
   `node skills/prism-thinking-refinery/tools/prism-update.mjs --dimension <dim> --delta <±val> --reason "<why>"`
-- To see the user's current thinking profile:
-  `node skills/prism-thinking-refinery/tools/prism-update.mjs --show`
+- Optionally suggest one alternative dimension (max once per conversation)
 
-Dimension emojis: 🧱 first_principles | 🔄 inverse_thinking | 👥 stakeholder_lens |
-🕸️ systems_thinking | ♟️ game_theory | 📜 historical_analogy | 🌊 second_order_effects | 🔗 cross_domain
-
-Don't overdo it. Max 2-3 tags per conversation. Skip if the user is in a hurry.
+Max 1-2 tags per conversation. When in doubt, don't tag.
 ```
 
 ## Reference Files
